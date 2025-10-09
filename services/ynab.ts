@@ -1,5 +1,4 @@
-// This file would contain your YNAB API integration logic.
-// For UI generation, we'll use mock data.
+// YNAB API integration using Next.js API routes
 
 export interface YNABAccount {
   id: string;
@@ -41,86 +40,59 @@ export interface YNABCategoryGroup {
   categories: YNABCategory[];
 }
 
-// Mock API functions
-export const getAccounts = async (): Promise<YNABAccount[]> => {
-  return new Promise((resolve) =>
-    setTimeout(() =>
-      resolve([
-        { id: 'acc1', name: 'Checking', type: 'checking', balance: 1500000, clearedBalance: 1400000, unclearedBalance: 100000 },
-        { id: 'acc2', name: 'Savings', type: 'savings', balance: 10000000, clearedBalance: 10000000, unclearedBalance: 0 },
-        { id: 'acc3', name: 'Credit Card', type: 'creditCard', balance: -500000, clearedBalance: -500000, unclearedBalance: 0 },
-      ]),
-    200
-    )
-  );
+// API functions
+export const getBudgets = async (): Promise<YNABBudget[]> => {
+  try {
+    const response = await fetch('/api/ynab/budgets');
+    if (!response.ok) {
+      throw new Error('Failed to fetch budgets');
+    }
+    const data = await response.json();
+    return data.budgets;
+  } catch (error) {
+    console.error('Error fetching budgets:', error);
+    throw error;
+  }
 };
 
-export const getBudgets = async (): Promise<YNABBudget[]> => {
-  return new Promise((resolve) =>
-    setTimeout(() =>
-      resolve([
-        { id: 'bud1', name: 'My Personal Budget', lastModified: new Date().toISOString() },
-        { id: 'bud2', name: 'Business Budget', lastModified: new Date().toISOString() },
-      ]),
-    200
-    )
-  );
+export const getAccounts = async (budgetId: string): Promise<YNABAccount[]> => {
+  try {
+    const response = await fetch(`/api/ynab/accounts?budgetId=${budgetId}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch accounts');
+    }
+    const data = await response.json();
+    return data.accounts;
+  } catch (error) {
+    console.error('Error fetching accounts:', error);
+    throw error;
+  }
 };
 
 export const getCategoryGroups = async (budgetId: string): Promise<YNABCategoryGroup[]> => {
-  // This would fetch real data for a given budgetId
-  return new Promise((resolve) =>
-    setTimeout(() =>
-      resolve([
-        {
-          id: 'cg1',
-          name: 'Immediate Obligations',
-          categories: [
-            { id: 'cat1', name: 'Rent', budgeted: 1500000, activity: -1500000, balance: 0 },
-            { id: 'cat2', name: 'Electricity', budgeted: 100000, activity: -85000, balance: 15000 },
-          ],
-        },
-        {
-          id: 'cg2',
-          name: 'Everyday Expenses',
-          categories: [
-            { id: 'cat3', name: 'Groceries', budgeted: 400000, activity: -380000, balance: 20000 },
-            { id: 'cat4', name: 'Dining Out', budgeted: 200000, activity: -250000, balance: -50000 },
-          ],
-        },
-      ]),
-    200
-    )
-  );
+  try {
+    const response = await fetch(`/api/ynab/categories?budgetId=${budgetId}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch categories');
+    }
+    const data = await response.json();
+    return data.categoryGroups;
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    throw error;
+  }
 };
 
 export const getTransactions = async (budgetId: string): Promise<YNABTransaction[]> => {
-  // This would fetch real data for a given budgetId
-  return new Promise((resolve) =>
-    setTimeout(() =>
-      resolve([
-        {
-          id: 't1',
-          date: '2023-10-26',
-          amount: -75230,
-          payeeName: 'Whole Foods',
-          categoryId: 'cat3',
-          memo: 'Weekly shopping',
-          cleared: 'cleared',
-          approved: true,
-        },
-        {
-          id: 't2',
-          date: '2023-10-25',
-          amount: 2500000,
-          payeeName: 'Salary',
-          categoryId: 'income',
-          memo: 'Bi-weekly pay',
-          cleared: 'cleared',
-          approved: true,
-        },
-      ]),
-    200
-    )
-  );
+  try {
+    const response = await fetch(`/api/ynab/transactions?budgetId=${budgetId}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch transactions');
+    }
+    const data = await response.json();
+    return data.transactions;
+  } catch (error) {
+    console.error('Error fetching transactions:', error);
+    throw error;
+  }
 };

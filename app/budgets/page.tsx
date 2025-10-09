@@ -1,50 +1,84 @@
+"use client"
+
+import { useState, useEffect } from "react"
 import { BudgetHeader } from "@/components/features/budget/budget-header"
 import { CategoryGroup } from "@/components/features/budget/category-group"
 import { BudgetSidebarPanel } from "@/components/features/budget/budget-sidebar-panel"
-
-const dummyBudgetGroups = [
-  {
-    id: "1",
-    name: "Immediate Obligations",
-    categories: [
-      { id: "c1", name: "Rent", emoji: "🏠", budgeted: 1500, activity: -1500, available: 0 },
-      { id: "c2", name: "Electricity", emoji: "💡", budgeted: 100, activity: -85, available: 15 },
-      { id: "c3", name: "Internet", emoji: "📡", budgeted: 70, activity: -70, available: 0 },
-      { id: "c4", name: "Phone Bill", emoji: "📱", budgeted: 50, activity: -50, available: 0 },
-    ],
-  },
-  {
-    id: "2",
-    name: "Everyday Expenses",
-    categories: [
-      { id: "c5", name: "Groceries", emoji: "🍎", budgeted: 400, activity: -380, available: 20 },
-      { id: "c6", name: "Dining Out", emoji: "🍔", budgeted: 200, activity: -250, available: -50 },
-      { id: "c7", name: "Transportation", emoji: "🚗", budgeted: 150, activity: -120, available: 30 },
-      { id: "c8", name: "Personal Care", emoji: "🧴", budgeted: 80, activity: -60, available: 20 },
-    ],
-  },
-  {
-    id: "3",
-    name: "Savings Goals",
-    categories: [
-      { id: "c9", name: "Emergency Fund", emoji: "🚨", budgeted: 200, activity: 0, available: 200 },
-      { id: "c10", name: "Vacation", emoji: "✈️", budgeted: 100, activity: 0, available: 100 },
-      { id: "c11", name: "New Gadget", emoji: "💻", budgeted: 50, activity: 0, available: 50 },
-    ],
-  },
-]
+import { useBudget } from "@/contexts/budget-context"
+import { getCategoryGroups, YNABCategoryGroup } from "@/services/ynab"
+import { Loader2 } from "lucide-react"
 
 export default function BudgetsPage() {
+  const { selectedBudget } = useBudget()
+  const [categoryGroups, setCategoryGroups] = useState<YNABCategoryGroup[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      if (!selectedBudget) return
+
+      try {
+        setIsLoading(true)
+        setError(null)
+        const fetchedGroups = await getCategoryGroups(selectedBudget.id)
+        setCategoryGroups(fetchedGroups)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch categories')
+        console.error('Error fetching categories:', err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchCategories()
+  }, [selectedBudget])
+
+  // Convert YNAB category groups to the format expected by CategoryGroup component
+  const formatCategoryGroups = (groups: YNABCategoryGroup[]) => {
+    return groups.map(group => ({
+      id: group.id,
+      name: group.name,
+      categories: group.categories.map(cat => ({
+        id: cat.id,
+        name: cat.name,
+        emoji: "📊", // You can add emoji mapping based on category names
+        budgeted: cat.budgeted / 1000, // Convert from milliunits
+        activity: cat.activity / 1000,
+        available: cat.balance / 1000,
+      }))
+    }))
+  }
+
   return (
     <div className="container mx-auto p-6 max-w-7xl flex flex-col lg:flex-row gap-6">
       <div className="flex-1">
         <h1 className="text-3xl font-bold mb-6">Budget Management</h1>
         <BudgetHeader />
-        <div className="space-y-4">
-          {dummyBudgetGroups.map((group) => (
-            <CategoryGroup key={group.id} group={group} />
-          ))}
-        </div>
+        {error && (
+          <div className="text-red-500 mb-4 p-4 bg-red-50 dark:bg-red-950 rounded-md">
+            {error}
+          </div>
+        )}
+        {isLoading ? (
+          <div className="flex justify-center items-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          </div>
+        ) : !selectedBudget ? (
+          <div className="text-center py-8 text-muted-foreground">
+            Please select a budget to view categories
+          </div>
+        ) : categoryGroups.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            No category groups found in this budget
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {formatCategoryGroups(categoryGroups).map((group) => (
+              <CategoryGroup key={group.id} group={group} />
+            ))}
+          </div>
+        )}
       </div>
       <BudgetSidebarPanel />
     </div>

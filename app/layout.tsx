@@ -5,6 +5,7 @@ import { AppSidebar, SidebarProvider } from "@/components/sidebar" // Import App
 import { TopNav } from "@/components/top-nav"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { SettingsProvider } from "@/contexts/settings-context"
+import { BudgetProvider } from "@/contexts/budget-context"
 import type React from "react"
 import { cookies } from "next/headers" // Import cookies for persisted sidebar state
 
@@ -29,19 +30,21 @@ export default async function RootLayout({
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <SettingsProvider>
-            <TooltipProvider delayDuration={0}>
-              <SidebarProvider defaultOpen={defaultSidebarOpen}>
-                <div className="min-h-screen flex">
-                  <AppSidebar /> {/* Use AppSidebar here */}
-                  <div className="flex-1 flex flex-col">
-                    <TopNav />
-                    <div className="flex-1 overflow-auto">
-                      <main className="w-full">{children}</main>
+            <BudgetProvider>
+              <TooltipProvider delayDuration={0}>
+                <SidebarProvider defaultOpen={defaultSidebarOpen}>
+                  <div className="min-h-screen flex">
+                    <AppSidebar /> {/* Use AppSidebar here */}
+                    <div className="flex-1 flex flex-col">
+                      <TopNav />
+                      <div className="flex-1 overflow-auto">
+                        <main className="w-full">{children}</main>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </SidebarProvider>
-            </TooltipProvider>
+                </SidebarProvider>
+              </TooltipProvider>
+            </BudgetProvider>
           </SettingsProvider>
         </ThemeProvider>
       </body>
