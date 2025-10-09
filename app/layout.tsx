@@ -6,6 +6,7 @@ import { TopNav } from "@/components/top-nav"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { SettingsProvider } from "@/contexts/settings-context"
 import { BudgetProvider } from "@/contexts/budget-context"
+import { Toaster } from "sonner"
 import type React from "react"
 import { cookies } from "next/headers" // Import cookies for persisted sidebar state
 
@@ -44,6 +45,7 @@ export default async function RootLayout({
                   </div>
                 </SidebarProvider>
               </TooltipProvider>
+              <Toaster position="top-right" richColors />
             </BudgetProvider>
           </SettingsProvider>
         </ThemeProvider>

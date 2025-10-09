@@ -3,10 +3,12 @@
 export interface YNABAccount {
   id: string;
   name: string;
-  type: 'checking' | 'savings' | 'creditCard';
+  type: 'checking' | 'savings' | 'creditCard' | 'cash' | 'lineOfCredit' | 'otherAsset' | 'otherLiability';
   balance: number;
   clearedBalance: number;
   unclearedBalance: number;
+  closed?: boolean;
+  deleted?: boolean;
 }
 
 export interface YNABBudget {

@@ -21,16 +21,12 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useSidebar } from "@/components/sidebar" // Assuming useSidebar is exported from sidebar.tsx
 import { ThemeToggle } from "@/components/theme-toggle"
+import { useBudget } from "@/contexts/budget-context"
 
 export function TopNav() {
   const { toggleSidebar } = useSidebar()
+  const { budgets, selectedBudget, setSelectedBudget, isLoading } = useBudget()
   const [searchOpen, setSearchOpen] = React.useState(false)
-
-  const budgets = [
-    { id: "1", name: "My Personal Budget" },
-    { id: "2", name: "Business Budget" },
-    { id: "3", name: "Vacation Fund" },
-  ]
 
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
@@ -46,10 +42,17 @@ export function TopNav() {
 
       {/* Current Budget Selector */}
       <div className="relative hidden sm:block">
-        <Select defaultValue={budgets[0].id}>
+        <Select
+          value={selectedBudget?.id || ""}
+          onValueChange={(value) => {
+            const budget = budgets.find(b => b.id === value)
+            if (budget) setSelectedBudget(budget)
+          }}
+          disabled={isLoading || budgets.length === 0}
+        >
           <SelectTrigger className="w-[180px]">
             <LayoutDashboard className="mr-2 h-4 w-4" />
-            <SelectValue placeholder="Select Budget" />
+            <SelectValue placeholder={isLoading ? "Loading budgets..." : "Select Budget"} />
           </SelectTrigger>
           <SelectContent>
             {budgets.map((budget) => (
@@ -85,7 +88,7 @@ export function TopNav() {
                 <CommandEmpty>No results found.</CommandEmpty>
                 <CommandGroup heading="Recent Searches">
                   <CommandItem>Groceries</CommandItem>
-                  <CommandItem>Rent Payment</Command-Item>
+                  <CommandItem>Rent Payment</CommandItem>
                 </CommandGroup>
                 <CommandGroup heading="Suggestions">
                   <CommandItem>Categorize pending transactions</CommandItem>

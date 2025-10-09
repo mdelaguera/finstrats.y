@@ -30,10 +30,12 @@ export async function GET(request: Request) {
       accounts: accounts.map(account => ({
         id: account.id,
         name: account.name,
-        type: account.type as 'checking' | 'savings' | 'creditCard',
+        type: account.type as 'checking' | 'savings' | 'creditCard' | 'cash' | 'lineOfCredit' | 'otherAsset' | 'otherLiability',
         balance: account.balance,
         clearedBalance: account.cleared_balance,
         unclearedBalance: account.uncleared_balance,
+        closed: account.closed,
+        deleted: account.deleted,
       })),
     });
   } catch (error) {
